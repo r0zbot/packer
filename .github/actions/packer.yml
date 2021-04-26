@@ -1,0 +1,16 @@
+# action.yml
+name: 'Packer Deployment'
+description: 'Runs a packer deployment using the docker image'
+inputs:
+  do_token:  # id of input
+    description: 'Token for DigitalOcean API'
+    required: true
+outputs:
+  do_image_id: # id of output
+    description: 'Image ID generated from DigitalOcean'
+runs:
+  using: 'docker'
+  #image: 'Dockerfile'
+  image: r0zbot/packer-doctl-awscli:latest
+  args:
+    - ${{ inputs.who-to-greet }}

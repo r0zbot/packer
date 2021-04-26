@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "name": "rocket-chat",
+      "builder_type": "digitalocean",
+      "build_time": 1618292439,
+      "files": null,
+      "artifact_id": "nyc3:82155068",
+      "packer_run_uuid": "e8cc9796-814c-6994-8fc3-dd37147df4b9",
+      "custom_data": {
+        "do_region": "nyc3",
+        "do_size": "s-1vcpu-1gb",
+        "image_name": "rocket-chat-20210413052941"
+      }
+    }
+  ],
+  "last_run_uuid": "e8cc9796-814c-6994-8fc3-dd37147df4b9"
+}
