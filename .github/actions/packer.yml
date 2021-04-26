@@ -12,5 +12,3 @@ runs:
   using: 'docker'
   #image: 'Dockerfile'
   image: r0zbot/packer-doctl-awscli:latest
-  args:
-    - ${{ inputs.who-to-greet }}

@@ -15,7 +15,7 @@ variable "aws_secret_key" {
 
 variable "do_ssh_key" {
     type    = string
-    default = "~/.ssh/id_rsa"
+    default = "$HOME/.ssh/id_rsa"
 }
 variable "do_token" {
     type    = string
@@ -130,9 +130,9 @@ build {
 
   post-processor "shell-local" {
     only = ["digitalocean.rocket-chat"]
-    script = "digitalocean_test.sh"
-    environment_vars = {
-      DO_SSH_KEY = "${var.do_ssh_key}"
-    }
+    script = "digitalocean_full_test.sh"
+    environment_vars = [
+      "DO_SSH_KEY=${var.do_ssh_key}",
+    ]
   }
 }
