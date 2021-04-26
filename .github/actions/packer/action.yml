@@ -10,5 +10,5 @@ outputs:
     description: 'Image ID generated from DigitalOcean'
 runs:
   using: 'docker'
-  #image: 'Dockerfile'
-  image: r0zbot/packer-doctl-awscli:latest
+  image: 'Dockerfile'
+  # image: r0zbot/packer-doctl-awscli:latest

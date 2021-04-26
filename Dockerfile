@@ -9,4 +9,4 @@ COPY . /deploy
 
 WORKDIR /deploy
 
-CMD ["bash", "/deploy/entrypoint.sh"]
+ENTRYPOINT ["bash", "/deploy/entrypoint.sh"]
