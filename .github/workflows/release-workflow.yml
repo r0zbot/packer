@@ -26,5 +26,4 @@ jobs:
           job_name: '*Packer image build*'
           mention: 'here'
           mention_if: 'failure'
-          channel: '#general'
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
