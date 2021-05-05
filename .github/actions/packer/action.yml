@@ -5,6 +5,12 @@ inputs:
   do_token:  # id of input
     description: 'Token for DigitalOcean API'
     required: true
+  awk_key_id:  # id of input
+    description: 'Key ID for AWS'
+    required: true
+  awk_secret_key:  # id of input
+    description: 'Secret Key for AWS'
+    required: true
 outputs:
   do_image_id: # id of output
     description: 'Image ID generated from DigitalOcean'

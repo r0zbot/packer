@@ -1,3 +1,4 @@
 credentials.*
 manifest.json
+manifest.*.json
 rocketchatctl

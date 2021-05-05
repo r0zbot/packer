@@ -1,7 +1,9 @@
 #!/bin/bash
 
 set -e
-set -o xtrace
+# set -o xtrace
+
+cd "$(dirname "$0")"
 
 MANIFEST_FILE="manifest.json"
 

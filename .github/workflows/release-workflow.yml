@@ -16,3 +16,15 @@ jobs:
         uses: ./.github/actions/packer
         with:
           do_token: ${{ secrets.do_token }}
+          awk_key_id: ${{ secrets.awk_key_id }}
+          awk_secret_key: ${{ secrets.awk_secret_key }}
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: '*Packer image build*'
+          mention: 'here'
+          mention_if: 'failure'
+          channel: '#general'
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}

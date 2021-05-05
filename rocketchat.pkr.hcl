@@ -13,10 +13,6 @@ variable "aws_secret_key" {
     type    = string
 }
 
-variable "do_ssh_key" {
-    type    = string
-    default = "$HOME/.ssh/id_rsa"
-}
 variable "do_token" {
     type    = string
 }
@@ -65,12 +61,14 @@ source "vagrant" "rocket-chat" {
   provider = "virtualbox"
   communicator = "ssh"
   add_force = true
-
 }
 
 # a build block invokes sources and runs provisioning steps on them.
 build {
-  sources = ["source.digitalocean.rocket-chat"]
+  sources = [
+    "source.digitalocean.rocket-chat",
+    "source.amazon-ebs.rocket-chat",
+  ]
 
   # remove old manifests if they exist
   provisioner "shell-local" {
@@ -85,18 +83,18 @@ build {
     inline = [
       "sudo apt-get -y update",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::='--force-confold' -y -q upgrade",
-      "reboot",
+      "sudo reboot",
     ]
   }
 
   provisioner "file"{
     pause_before = "10s"
-    source = "motd.sh"
+    source = "image_creation/motd.sh"
     destination = "/tmp/motd.sh"
   }
 
   provisioner "shell" {
-    script = "provision.sh"
+    script = "image_creation/provision.sh"
   }
 
   provisioner "shell" {
@@ -118,7 +116,6 @@ build {
   }
 
   post-processor "manifest" {
-    only = ["digitalocean.rocket-chat"]
     output = "manifest.json"
     strip_path = true
     custom_data = {
@@ -129,10 +126,16 @@ build {
   }
 
   post-processor "shell-local" {
+    only = ["amazon-ebs.rocket-chat"]
+    inline = [
+      "packer build -var 'image_name=${local.image_name}' -var 'aws_secret_key=${var.aws_secret_key}' -var 'aws_key_id=${var.aws_key_id}' -only amazon-ebs.rocket-chat image_test/image_test.pkr.hcl",
+    ]
+  }
+
+  post-processor "shell-local" {
     only = ["digitalocean.rocket-chat"]
-    script = "digitalocean_full_test.sh"
-    environment_vars = [
-      "DO_SSH_KEY=${var.do_ssh_key}",
+    inline = [
+      "packer build -var 'image_name=${local.image_name}' -var \"do_image_id=$(jq -r '.builds[] | select(.builder_type== \"digitalocean\")' manifest.json | jq -r '.artifact_id' | cut -d':' -f 2 )\" -var 'do_token=${var.do_token}' -only digitalocean.rocket-chat image_test/image_test.pkr.hcl",
     ]
   }
 }
