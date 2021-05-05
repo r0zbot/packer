@@ -88,7 +88,7 @@ build {
   }
 
   provisioner "file"{
-    pause_before = "10s"
+    pause_before = "30s"
     source = "image_creation/motd.sh"
     destination = "/tmp/motd.sh"
   }
