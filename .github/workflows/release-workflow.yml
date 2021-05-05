@@ -16,8 +16,8 @@ jobs:
         uses: ./.github/actions/packer
         with:
           do_token: ${{ secrets.do_token }}
-          awk_key_id: ${{ secrets.awk_key_id }}
-          awk_secret_key: ${{ secrets.awk_secret_key }}
+          aws_key_id: ${{ secrets.aws_key_id }}
+          aws_secret_key: ${{ secrets.aws_secret_key }}
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
         if: always()
