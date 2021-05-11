@@ -2,8 +2,9 @@ locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
-locals {
-    image_name = "rocket-chat-${local.timestamp}"
+variable "rocketchat_version" {
+    type    = string
+    default = "latest"
 }
 
 variable "aws_key_id" {
@@ -23,6 +24,10 @@ variable "do_size" {
 variable "do_region" {
     type    = string
     default = "nyc3"
+}
+
+locals {
+    image_name = "rocket-chat-${var.rocketchat_version}-${local.timestamp}"
 }
 
 source "amazon-ebs" "aws-ami" {
@@ -93,6 +98,7 @@ build {
     environment_vars = [
       "SOURCE_NAME=${source.name}",
       "BUILD_HOST=${build.Host}",
+      "ROCKETCHAT_VERSION=${rocketchat_version}",
     ]
   }
 

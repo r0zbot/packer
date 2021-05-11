@@ -4,7 +4,7 @@ echo "Installing Rocket.Chat and dependencies through rocketchatctl for platform
 sudo curl -L https://install.rocket.chat/rocketchatctl -o /usr/local/bin/rocketchatctl
 sudo chmod +x /usr/local/bin/rocketchatctl
 sudo sed -i '/&& print_input_from_pipe_error_and_exit/d' /usr/local/bin/rocketchatctl
-sudo rocketchatctl install --root-url=https://$BUILD_HOST --webserver=traefik --letsencrypt-email=MyRocketChat@DO --mongo-version=4.0.3 --bind-loopback=false --install-node --use-mongo
+sudo rocketchatctl install --root-url=https://$BUILD_HOST --version=$ROCKETCHAT_VERSION --webserver=traefik --letsencrypt-email=MyRocketChat@DO --mongo-version=4.0.3 --bind-loopback=false --install-node --use-mongo
 sudo sed -i "/User=rocketchat/a Environment=DEPLOY_PLATFORM=$SOURCE_NAME" /lib/systemd/system/rocketchat.service
 mongo rocketchat --eval 'db.rocketchat_settings.deleteOne({ _id: "uniqueID" })'
 
