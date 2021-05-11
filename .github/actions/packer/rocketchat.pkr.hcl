@@ -51,7 +51,7 @@ source "amazon-ebs" "aws-ami" {
 source "digitalocean" "do-marketplace" {
   api_token     = "${var.do_token}"
   snapshot_name = "${local.image_name}"
-  size          = "s-1vcpu-1gb"
+  size          = "s-1vcpu-1gb-amd"
   region        = "nyc3"
   image         = "ubuntu-20-04-x64"
   ssh_username  = "root"
