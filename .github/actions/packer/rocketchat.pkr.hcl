@@ -25,11 +25,7 @@ variable "do_region" {
     default = "nyc3"
 }
 
-
-# source blocks configure your builder plugins; your source is then used inside
-# build blocks to create resources. A build block runs provisioners and
-# post-processors on an instance created by the source.
-source "amazon-ebs" "rocket-chat" {
+source "amazon-ebs" "aws-ami" {
   access_key    = "${var.aws_key_id}"
   ami_name      = "${local.image_name}"
   instance_type = "t2.micro"
@@ -47,7 +43,7 @@ source "amazon-ebs" "rocket-chat" {
   ssh_username = "ubuntu"
 }
 
-source "digitalocean" "rocket-chat" {
+source "digitalocean" "do-marketplace" {
   api_token     = "${var.do_token}"
   snapshot_name = "${local.image_name}"
   size          = "s-1vcpu-1gb"
@@ -63,11 +59,10 @@ source "vagrant" "rocket-chat" {
   add_force = true
 }
 
-# a build block invokes sources and runs provisioning steps on them.
 build {
   sources = [
-    "source.digitalocean.rocket-chat",
-    "source.amazon-ebs.rocket-chat",
+    "source.digitalocean.do-marketplace",
+    "source.amazon-ebs.aws-ami",
   ]
 
   # remove old manifests if they exist
@@ -95,6 +90,10 @@ build {
 
   provisioner "shell" {
     script = "image_creation/provision.sh"
+    environment_vars = [
+      "SOURCE_NAME=${source.name}",
+      "BUILD_HOST=${build.Host}",
+    ]
   }
 
   provisioner "shell" {
