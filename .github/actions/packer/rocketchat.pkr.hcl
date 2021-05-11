@@ -98,7 +98,7 @@ build {
     environment_vars = [
       "SOURCE_NAME=${source.name}",
       "BUILD_HOST=${build.Host}",
-      "ROCKETCHAT_VERSION=${rocketchat_version}",
+      "ROCKETCHAT_VERSION=${var.rocketchat_version}",
     ]
   }
 
