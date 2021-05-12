@@ -1,4 +1,4 @@
-name: Create cloud images
+name: Create release images
 
 on:
   release:
@@ -8,23 +8,42 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  # release_cloud:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Run the packer install and test
+  #       uses: ./.github/actions/packer
+  #       with:
+  #         rocketchat_version: '${{ github.event.release.tag_name }}'
+  #         do_token: ${{ secrets.do_token }}
+  #         aws_key_id: ${{ secrets.aws_key_id }}
+  #         aws_secret_key: ${{ secrets.aws_secret_key }}
+  #     - name: Rocket.Chat Notification
+  #       uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+  #       if: always()
+  #       with:
+  #         type: ${{ job.status }}
+  #         job_name: '*Packer image build*'
+  #         mention: 'here'
+  #         mention_if: 'failure'
+  #         url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+  
+  release_snap:
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: Run the packer install and test
-        uses: ./.github/actions/packer
-        with:
-          rocketchat_version: '${{ github.event.release.tag_name }}'
-          do_token: ${{ secrets.do_token }}
-          aws_key_id: ${{ secrets.aws_key_id }}
-          aws_secret_key: ${{ secrets.aws_secret_key }}
-      - name: Rocket.Chat Notification
-        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
-        with:
-          type: ${{ job.status }}
-          job_name: '*Packer image build*'
-          mention: 'here'
-          mention_if: 'failure'
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1.2.0
+      - name: Checkout main Rocket.Chat repo
+        uses: actions/checkout@v2
+        with: 
+          path: 'Rocket.Chat'
+          ref: '${{ github.event.release.tag_name }}'
+      - name: "Run snapcraft build"
+        working-directory: "./snap"
+        run: |
+          snapcraft stage
+          snapcraft snap
+      
+      
