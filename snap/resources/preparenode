@@ -20,4 +20,4 @@ fi
 
 
 wget https://nodejs.org/dist/$node_version/node-$node_version-linux-$node_arch.tar.xz
-tar xf node-$node_version-linux-$node_arch.tar.xz --strip 1
+tar xf node-$node_version-linux-$node_arch.tar.xz --strip 1 --directory "$SNAPCRAFT_PART_INSTALL"

@@ -11,6 +11,7 @@ version: 3.15.0-develop
 summary: Rocket.Chat server
 description: Have your own Slack like online chat, built with Meteor. https://rocket.chat/
 confinement: strict
+base: core
 assumes: [snapd2.21]
 apps:
     rocketchat-server:
@@ -45,17 +46,22 @@ parts:
     node:
         plugin: dump
         source: ./
-        prepare: ./resources/preparenode
+        override-build: ./resources/preparenode
         build-packages:
             # For fibers
             - python
             - build-essential
             - nodejs
+        stage:
+            - bin
+            - include
+            - share
+            - lib
     rocketchat-server:
         build-packages:
             - curl
         plugin: dump
-        prepare: ./resources/prepareRocketChat
+        override-build: ./resources/prepareRocketChat
         after: [node]
         source: ./
         stage-packages:
@@ -72,7 +78,7 @@ parts:
         build-packages:
             - wget
         source: ./
-        prepare: ./resources/preparemongo
+        override-build: ./resources/preparemongo
         plugin: dump
         stage-packages:
             - libssl1.0.0
@@ -95,7 +101,7 @@ parts:
         prime:
             - bin
     caddy:
-        prepare: ./resources/preparecaddy
+        override-build: ./resources/preparecaddy
         plugin: dump
         source: ./
         prime:
