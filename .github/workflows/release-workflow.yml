@@ -41,9 +41,7 @@ jobs:
           path: 'Rocket.Chat'
           ref: '${{ github.event.release.tag_name }}'
       - name: "Run snapcraft build"
-        working-directory: "./snap"
         run: |
-          snapcraft stage
           snapcraft snap
       
       
