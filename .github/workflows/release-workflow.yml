@@ -28,7 +28,7 @@ jobs:
   #         mention: 'here'
   #         mention_if: 'failure'
   #         url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-  
+
   release_snap:
     runs-on: ubuntu-18.04
     steps:
@@ -38,7 +38,6 @@ jobs:
         with:
           path: "./snapcraft"
       - name: Install snap
-        run: |
-        sudo snap install --dangerous ${{ steps.snapcraft.outputs.snap }}
+        run: sudo snap install --dangerous ${{ steps.snapcraft.outputs.snap }}
         
       
