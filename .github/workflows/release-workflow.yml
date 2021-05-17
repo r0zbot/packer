@@ -35,6 +35,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v1.2.0
+        with:
+          snapcraft_token: ${{ secrets.snapcraft_login }}
       - name: Checkout main Rocket.Chat repo
         uses: actions/checkout@v2
         with: 
@@ -43,6 +45,6 @@ jobs:
       - name: "Run snapcraft build"
         working-directory: "./snapcraft"
         run: |
-          snapcraft snap
+          snapcraft remote-build --build-on=amd64,arm64,armhf --launchpad-accept-public-upload
       
       
