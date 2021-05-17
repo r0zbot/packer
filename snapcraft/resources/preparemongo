@@ -20,3 +20,5 @@ else
 
     mv usr/bin bin
 fi
+
+mv bin "$SNAPCRAFT_PART_INSTALL"
