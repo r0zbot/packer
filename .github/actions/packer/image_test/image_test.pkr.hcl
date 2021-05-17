@@ -36,7 +36,7 @@ source "digitalocean" "do-marketplace" {
   region        = "nyc3"
 }
 
-source "amazon-ebs" "rocket-chat" {
+source "amazon-ebs" "aws-ami" {
   access_key    = "${var.aws_key_id}"
   ami_name      = "test-${var.image_name}"
   instance_type = "t2.micro"
