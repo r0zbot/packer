@@ -103,7 +103,7 @@ build {
   }
 
   provisioner "shell" {
-    only = ["amazon-ebs.rocket-chat"]
+    only = ["amazon-ebs.aws-ami"]
     # Allow it to run on the 8GB free-tier instance
     inline = [
       "sudo sed -i '/^ExecStart/ s/$/ --smallfiles/' /lib/systemd/system/mongod.service", 
@@ -111,7 +111,7 @@ build {
   }
 
   provisioner "shell" {
-    only = ["digitalocean.rocket-chat"]
+    only = ["digitalocean.do-marketplace"]
     inline = [
       "git clone https://github.com/digitalocean/marketplace-partners.git",
       "./marketplace-partners/scripts/90-cleanup.sh ",
@@ -131,16 +131,16 @@ build {
   }
 
   post-processor "shell-local" {
-    only = ["amazon-ebs.rocket-chat"]
+    only = ["amazon-ebs.aws-ami"]
     inline = [
-      "packer build -var 'image_name=${local.image_name}' -var 'aws_secret_key=${var.aws_secret_key}' -var 'aws_key_id=${var.aws_key_id}' -only amazon-ebs.rocket-chat image_test/image_test.pkr.hcl",
+      "packer build -var 'image_name=${local.image_name}' -var 'aws_secret_key=${var.aws_secret_key}' -var 'aws_key_id=${var.aws_key_id}' -only amazon-ebs.aws-ami image_test/image_test.pkr.hcl",
     ]
   }
 
   post-processor "shell-local" {
-    only = ["digitalocean.rocket-chat"]
+    only = ["digitalocean.do-marketplace"]
     inline = [
-      "packer build -var 'image_name=${local.image_name}' -var \"do_image_id=$(jq -r '.builds[] | select(.builder_type== \"digitalocean\")' manifest.json | jq -r '.artifact_id' | cut -d':' -f 2 )\" -var 'do_token=${var.do_token}' -only digitalocean.rocket-chat image_test/image_test.pkr.hcl",
+      "packer build -var 'image_name=${local.image_name}' -var \"do_image_id=$(jq -r '.builds[] | select(.builder_type== \"digitalocean\")' manifest.json | jq -r '.artifact_id' | cut -d':' -f 2 )\" -var 'do_token=${var.do_token}' -only digitalocean.do-marketplace image_test/image_test.pkr.hcl",
     ]
   }
 }

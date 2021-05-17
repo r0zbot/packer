@@ -27,7 +27,7 @@ variable "image_name" {
 }
 
 
-source "digitalocean" "rocket-chat" {
+source "digitalocean" "do-marketplace" {
   api_token     = "${var.do_token}"
   image         = "${var.do_image_id}"
   ssh_username  = "root"
@@ -62,8 +62,8 @@ source "amazon-ebs" "rocket-chat" {
 # a build block invokes sources and runs provisioning steps on them.
 build {
   sources = [
-    "source.digitalocean.rocket-chat",
-    "source.amazon-ebs.rocket-chat",
+    "source.digitalocean.do-marketplace",
+    "source.amazon-ebs.aws-ami",
   ]
 
   provisioner "shell" {
