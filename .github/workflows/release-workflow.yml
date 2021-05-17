@@ -33,19 +33,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v1.2.0
+      - name: Build snap
+        uses: snapcore/action-build@v1
         with:
-          snapcraft_token: ${{ secrets.snapcraft_login }}
-      - name: Checkout main Rocket.Chat repo
-        uses: actions/checkout@v2
-        with: 
-          path: 'Rocket.Chat'
-          ref: '${{ github.event.release.tag_name }}'
-      - name: "Run snapcraft build"
-        working-directory: "./snapcraft"
-        run: |
-          # snapcraft remote-build --build-on=amd64,arm64,armhf --launchpad-accept-public-upload
-          sg lxd -c 'snapcraft snap --use-lxd'
+          path: "./snapcraft"
       
       
