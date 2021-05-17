@@ -35,9 +35,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build snap
         uses: snapcore/action-build@v1
+        id: build
         with:
           path: "./snapcraft"
       - name: Install snap
-        run: sudo snap install --dangerous ${{ steps.snapcraft.outputs.snap }}
+        run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
+      - name: Test the installed snap
+        run: droplet_ip=127.0.0.1 ./.github/actions/packer/image_test/image_local_test.sh skip-traefik
         
       

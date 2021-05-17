@@ -31,7 +31,9 @@ sleep 5
 echo "Running tests on rocketchat"
 ./basic_test.sh http://$droplet_ip:3000
 
-echo "Running tests on rocketchat through traefik"
-./basic_test.sh https://$droplet_ip insecure
+if [[ "$1" != "skip-traefik" ]]; then
+  echo "Running tests on rocketchat through traefik"
+  ./basic_test.sh https://$droplet_ip insecure
+fi
 
 echo "Tests passed!"
