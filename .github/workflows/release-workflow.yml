@@ -37,5 +37,8 @@ jobs:
         uses: snapcore/action-build@v1
         with:
           path: "./snapcraft"
-      
+      - name: Install snap
+        run: |
+        sudo snap install --dangerous ${{ steps.snapcraft.outputs.snap }}
+        
       
