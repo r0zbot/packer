@@ -5,9 +5,6 @@ set -e
 
 cd "$(dirname "$0")"
 
-MANIFEST_FILE="manifest.json"
-
-
 function wait_http () {
   attempt_counter=0
   max_attempts=150

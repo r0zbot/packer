@@ -33,6 +33,10 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - name: Parse channel from version
+        run: |
+          echo "CHANNEL=${SNAPCRAFT_PROJECT_VERSION:0:1}.x" >> $GITHUB_ENV 
+        id: version
       - name: Set build version 
         run: sed -i 's/ROCKET_CHAT_BUILD_VERSION/${{ github.event.release.tag_name }}/g' ./snapcraft/snap/snapcraft.yaml
       - name: Build snap
@@ -43,6 +47,14 @@ jobs:
       - name: Install snap
         run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
       - name: Test the installed snap
-        run: droplet_ip=127.0.0.1 ./.github/actions/packer/image_test/image_local_test.sh skip-traefik
-        
+        run: droplet_ip=127.0.0.1 ./test_scripts/install_test.sh
+      - name: Remove snap
+        run: sudo snap remove rocketchat-server
+      - name: Publish snap to edge channel
+        uses: snapcore/action-publish@v1
+        with:
+          store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
+          snap: ${{ steps.build.outputs.snap }}
+          release: ${{ env.CHANNEL }}/edge
+
       
