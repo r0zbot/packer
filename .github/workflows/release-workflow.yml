@@ -45,6 +45,6 @@ jobs:
       - name: "Run snapcraft build"
         working-directory: "./snapcraft"
         run: |
-          snapcraft remote-build --build-on=amd64,arm64,armhf --launchpad-accept-public-upload
+          snapcraft remote-build --build-on=amd64,arm64,armhf --launchpad-accept-public-upload --launchpad-user r0zbot
       
       
