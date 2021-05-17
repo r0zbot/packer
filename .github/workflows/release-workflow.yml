@@ -35,8 +35,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Parse channel from version
         run: |
-          env
-          echo "CHANNEL=${SNAPCRAFT_PROJECT_VERSION:0:1}.x" >> $GITHUB_ENV 
+          export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV 
         id: version
       - name: Set build version 
         run: sed -i 's/ROCKET_CHAT_BUILD_VERSION/${{ github.event.release.tag_name }}/g' ./snapcraft/snap/snapcraft.yaml
