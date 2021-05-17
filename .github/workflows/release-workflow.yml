@@ -48,7 +48,7 @@ jobs:
       - name: Install snap
         run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
       - name: Test the installed snap
-        run: droplet_ip=127.0.0.1 ./test_scripts/install_test.sh
+        run: ./test_scripts/install_test.sh
       - name: Remove snap
         run: sudo snap remove rocketchat-server
       - name: Publish snap to edge channel
@@ -57,5 +57,11 @@ jobs:
           store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
           snap: ${{ steps.build.outputs.snap }}
           release: ${{ env.CHANNEL }}/edge
-
+      - name: Test snap updating
+        run: ./test_scripts/update_test.sh
+      - name: Promote edge to candidate
+        run: |
+          echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
+          REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
+          snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
       
