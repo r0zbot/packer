@@ -46,6 +46,6 @@ jobs:
         working-directory: "./snapcraft"
         run: |
           # snapcraft remote-build --build-on=amd64,arm64,armhf --launchpad-accept-public-upload
-          snapcraft snap --use-lxd
+          sg lxd -c 'snapcraft snap --use-lxd'
       
       
