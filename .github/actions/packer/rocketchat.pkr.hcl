@@ -80,6 +80,7 @@ build {
   provisioner "shell" {
     # Allow time for the instance to properly initialize after SSH is ready
     pause_before = "30s" 
+    expect_disconnect = true
     inline = [
       "sudo apt-get -y update",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::='--force-confold' -y -q upgrade",
