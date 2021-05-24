@@ -1,4 +1,4 @@
-name: Create release images
+name: Create snap package
 
 on:
   release:
