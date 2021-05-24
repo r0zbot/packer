@@ -8,29 +8,102 @@ on:
   workflow_dispatch:
 
 jobs:
-  release_cloud:
+  start_arm64_runner:
+    name: Start self-hosted EC2 ARM64 runner
     runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Run the packer install and test
-        uses: ./.github/actions/packer
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          rocketchat_version: '${{ github.event.release.tag_name }}'
-          do_token: ${{ secrets.do_token }}
-          aws_key_id: ${{ secrets.aws_key_id }}
-          aws_secret_key: ${{ secrets.aws_secret_key }}
-      - name: Rocket.Chat Notification
-        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
+          aws-access-key-id: ${{ secrets.aws_key_id }}
+          aws-secret-access-key: ${{ secrets.aws_secret_key }}
+          aws-region: us-east-1
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2.2.0
         with:
-          type: ${{ job.status }}
-          job_name: '*Packer image build*'
-          mention: 'here'
-          mention_if: 'failure'
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          mode: start
+          github-token: ${{ secrets.GH_TOKEN }}
+          ec2-image-id: ami-08353a25e80beea3e
+          ec2-instance-type: t4g.micro
+          subnet-id: vpc-c769edba
+          security-group-id: sg-0e684b4deb4049758
+          aws-resource-tags: > # optional, requires additional permissions
+            [
+              {"Key": "Name", "Value": "ec2-github-runner"},
+              {"Key": "GitHubRepository", "Value": "${{ github.repository }}"}
+            ]
+  # release_cloud:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Run the packer install and test
+  #       uses: ./.github/actions/packer
+  #       with:
+  #         rocketchat_version: '${{ github.event.release.tag_name }}'
+  #         do_token: ${{ secrets.do_token }}
+  #         aws_key_id: ${{ secrets.aws_key_id }}
+  #         aws_secret_key: ${{ secrets.aws_secret_key }}
+  #     - name: Rocket.Chat Notification
+  #       uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+  #       if: always()
+  #       with:
+  #         type: ${{ job.status }}
+  #         job_name: '*Packer image build*'
+  #         mention: 'here'
+  #         mention_if: 'failure'
+  #         url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
 
-  release_snap:
-    runs-on: ubuntu-18.04
+  # release_snap_amd64:
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Parse channel from version
+  #       run: |
+  #         export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+  #         echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV 
+  #       id: version
+  #     - name: Set build version 
+  #       run: sed -i 's/ROCKET_CHAT_BUILD_VERSION/${{ github.event.release.tag_name }}/g' ./snapcraft/snap/snapcraft.yaml
+  #     - name: Build snap
+  #       uses: snapcore/action-build@v1
+  #       id: build
+  #       with:
+  #         path: "./snapcraft"
+  #     - name: Install snap
+  #       run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
+  #     - name: Test the installed snap
+  #       run: ./test_scripts/install_test.sh
+  #     - name: Remove snap
+  #       run: sudo snap remove rocketchat-server
+  #     - name: Publish snap to edge channel
+  #       uses: snapcore/action-publish@v1
+  #       with:
+  #         store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
+  #         snap: ${{ steps.build.outputs.snap }}
+  #         release: ${{ env.CHANNEL }}/edge
+  #     - name: Test snap updating
+  #       run: ./test_scripts/update_test.sh
+  #     - name: Promote edge to candidate
+  #       run: |
+  #         echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
+  #         REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
+  #         snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
+  #     - name: Rocket.Chat Notification
+  #       uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+  #       if: always()
+  #       with:
+  #         type: ${{ job.status }}
+  #         job_name: '*Snapcraft build*'
+  #         mention: 'here'
+  #         mention_if: 'failure'
+  #         url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+  release_snap_arm64:
+    runs-on: ${{ needs.start_arm64_runner.outputs.label }}
+    needs: start_arm64_runner
     steps:
       - uses: actions/checkout@v2
       - name: Parse channel from version
@@ -62,14 +135,35 @@ jobs:
       - name: Promote edge to candidate
         run: |
           echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
-          REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
+          REVISION=$(snapcraft list-revisions rocketchat-server --arch arm64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
           snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
-      - name: Rocket.Chat Notification
-        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
+      # - name: Rocket.Chat Notification
+      #   uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      #   if: always()
+      #   with:
+      #     type: ${{ job.status }}
+      #     job_name: '*Snapcraft build*'
+      #     mention: 'here'
+      #     mention_if: 'failure'
+      #     url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start_arm64_runner # required to get output from the start_arm64_runner job
+      - release_snap_arm64 # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          type: ${{ job.status }}
-          job_name: '*Snapcraft build*'
-          mention: 'here'
-          mention_if: 'failure'
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2.2.0
+        with:
+          mode: stop
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start_arm64_runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start_arm64_runner.outputs.ec2-instance-id }}
