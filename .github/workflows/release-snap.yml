@@ -1,0 +1,70 @@
+name: Create release images
+
+on:
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release version'     
+        required: true
+        default: '3.14.0'
+env:
+  SNAPCRAFT_REPO: r0zbot/Rocket.Chat.Snap
+jobs:
+  release_snap_amd64:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: "${{ env.PACKER_REPO }}"
+          
+      - name: Parse environment variables
+        run: |
+          if [[ -n "${{ github.event.release.tag_name }}" ]]; then
+            export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          else
+            export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          fi
+
+          echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV
+          echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
+
+        id: version
+      - name: Set build version 
+        run: sed -i 's/ROCKET_CHAT_BUILD_VERSION/${{ env.ROCKETCHAT_VERSION }}/g' ./snap/snapcraft.yaml
+      - name: Build snap
+        uses: snapcore/action-build@v1
+        id: build
+        with:
+          path: "."
+      - name: Install snap
+        run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
+      - name: Test the installed snap
+        run: ./test_scripts/install_test.sh
+      - name: Remove snap
+        run: sudo snap remove rocketchat-server
+      - name: Publish snap to edge channel
+        uses: snapcore/action-publish@v1
+        with:
+          store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
+          snap: ${{ steps.build.outputs.snap }}
+          release: ${{ env.CHANNEL }}/edge
+      - name: Test snap updating
+        run: ./test_scripts/update_test.sh
+      - name: Promote edge to candidate
+        run: |
+          echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
+          REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
+          snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: '*Snapcraft build*'
+          mention: 'here'
+          mention_if: 'failure'
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
