@@ -54,7 +54,7 @@ jobs:
         run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
       
       - name: Test the installed snap
-        run: ./test_scripts/install_test.sh
+        run: ./test_scripts/install_test.sh 127.0.0.1
       
       - name: Remove snap
         run: sudo snap remove rocketchat-server
@@ -67,7 +67,7 @@ jobs:
           release: ${{ env.CHANNEL }}/edge
       
       - name: Test snap updating
-        run: ./test_scripts/update_test.sh
+        run: ./test_scripts/snap_update_test.sh
       
       - name: Promote edge to candidate
         run: |
