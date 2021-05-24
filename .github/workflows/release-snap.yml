@@ -12,7 +12,7 @@ on:
         required: true
         default: '3.14.0'
 env:
-  SNAPCRAFT_REPO: r0zbot/Rocket.Chat.Snap
+  SNAPCRAFT_REPO: RocketChat/rocketchat-server-snap
   TESTS_REPO: r0zbot/rocketchat-release-tests
 jobs:
   release_snap_amd64:
@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: "${{ env.SNAPCRAFT_REPO }}"
+          ref: improve/use-core-base #TEMPORARY!
       
       - name: Clone tests repo
         uses: actions/checkout@v2
