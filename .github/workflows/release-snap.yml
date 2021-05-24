@@ -1,4 +1,4 @@
-name: Create snap package
+name: Create snap packages
 
 on:
   release:
