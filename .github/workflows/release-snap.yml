@@ -13,13 +13,21 @@ on:
         default: '3.14.0'
 env:
   SNAPCRAFT_REPO: r0zbot/Rocket.Chat.Snap
+  TESTS_REPO: r0zbot/rocketchat-release-tests
 jobs:
   release_snap_amd64:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Clone snapcraft repo
+        uses: actions/checkout@v2
         with:
           repository: "${{ env.SNAPCRAFT_REPO }}"
+      
+      - name: Clone tests repo
+        uses: actions/checkout@v2
+        with:
+          repository: "${{ env.TESTS_REPO }}"
+          path: './test_scripts'
           
       - name: Parse environment variables
         run: |
@@ -35,30 +43,38 @@ jobs:
         id: version
       - name: Set build version 
         run: sed -i 's/ROCKET_CHAT_BUILD_VERSION/${{ env.ROCKETCHAT_VERSION }}/g' ./snap/snapcraft.yaml
+      
       - name: Build snap
         uses: snapcore/action-build@v1
         id: build
         with:
           path: "."
+      
       - name: Install snap
         run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
+      
       - name: Test the installed snap
         run: ./test_scripts/install_test.sh
+      
       - name: Remove snap
         run: sudo snap remove rocketchat-server
+      
       - name: Publish snap to edge channel
         uses: snapcore/action-publish@v1
         with:
           store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
           snap: ${{ steps.build.outputs.snap }}
           release: ${{ env.CHANNEL }}/edge
+      
       - name: Test snap updating
         run: ./test_scripts/update_test.sh
+      
       - name: Promote edge to candidate
         run: |
           echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
           REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
           snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
+      
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
         if: always()
