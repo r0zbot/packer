@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          repository: "${{ env.PACKER_REPO }}"
+          repository: "${{ env.SNAPCRAFT_REPO }}"
           
       - name: Parse environment variables
         run: |
