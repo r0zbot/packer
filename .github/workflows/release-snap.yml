@@ -15,9 +15,39 @@ env:
   SNAPCRAFT_REPO: RocketChat/rocketchat-server-snap
   TESTS_REPO: r0zbot/rocketchat-release-tests
 jobs:
-  release_snap_amd64:
+  verify_release:
     runs-on: ubuntu-18.04
     steps:
+      - name: Parse environment variables
+        run: |
+          if [[ -n "${{ github.event.release.tag_name }}" ]]; then
+            export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          else
+            export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          fi
+
+          echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV
+          echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
+
+      - name: "Check if release candidate"
+        run: |
+          [[ -z "$(echo ${{}} | grep rc)" ]]
+  release_snap_amd64:
+    if: ${{ }}
+    runs-on: ubuntu-18.04
+    needs: verify_release
+    steps:
+      - name: Parse environment variables
+        run: |
+          if [[ -n "${{ github.event.release.tag_name }}" ]]; then
+            export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          else
+            export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          fi
+
+          echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV
+          echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
+
       - name: Clone snapcraft repo
         uses: actions/checkout@v2
         with:
@@ -30,17 +60,6 @@ jobs:
           repository: "${{ env.TESTS_REPO }}"
           path: './test_scripts'
           
-      - name: Parse environment variables
-        run: |
-          if [[ -n "${{ github.event.release.tag_name }}" ]]; then
-            export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
-          else
-            export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
-          fi
-
-          echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV
-          echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
-
         id: version
       - name: Set build version 
         run: sed -i 's/ROCKET_CHAT_BUILD_VERSION/${{ env.ROCKETCHAT_VERSION }}/g' ./snap/snapcraft.yaml
