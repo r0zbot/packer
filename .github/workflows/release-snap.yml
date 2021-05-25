@@ -26,12 +26,12 @@ jobs:
             export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
           fi
 
-          echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV
+          echo "CHANNEL=${ROCKETCHAT_VERS ION:0:1}.x" >> $GITHUB_ENV
           echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
 
       - name: "Check if release candidate"
         run: |
-          [[ -z "$(echo ${{}} | grep rc)" ]]
+          [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]]
   release_snap_amd64:
     if: ${{ }}
     runs-on: ubuntu-18.04
