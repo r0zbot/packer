@@ -33,7 +33,6 @@ jobs:
         run: |
           [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]]
   release_snap_amd64:
-    if: ${{ }}
     runs-on: ubuntu-18.04
     needs: verify_release
     steps:
