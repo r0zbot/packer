@@ -76,12 +76,12 @@ jobs:
           REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
           snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
       
-      - name: Rocket.Chat Notification
-        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
-        with:
-          type: ${{ job.status }}
-          job_name: '*Snapcraft build*'
-          mention: 'here'
-          mention_if: 'failure'
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+      # - name: Rocket.Chat Notification
+      #   uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      #   if: always()
+      #   with:
+      #     type: ${{ job.status }}
+      #     job_name: '*Snapcraft build*'
+      #     mention: 'here'
+      #     mention_if: 'failure'
+      #     url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
