@@ -13,7 +13,7 @@ on:
         default: '3.14.0'
 env:
   SNAPCRAFT_REPO: RocketChat/rocketchat-server-snap
-  TESTS_REPO: r0zbot/rocketchat-release-tests
+  TESTS_REPO: RocketChat/rocketchat-release-tests
 jobs:
   verify_release:
     runs-on: ubuntu-18.04
@@ -69,11 +69,8 @@ jobs:
         with:
           path: "."
       
-      - name: Install snap
-        run: sudo snap install --dangerous ${{ steps.build.outputs.snap }}
-      
-      - name: Test the installed snap
-        run: ./test_scripts/install_test.sh 127.0.0.1
+      - name: Install and test the generated snap
+        run: ./test_scripts/snap_install_test.sh ${{ steps.build.outputs.snap }}
       
       - name: Remove snap
         run: sudo snap remove rocketchat-server
