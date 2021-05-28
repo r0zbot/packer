@@ -11,8 +11,6 @@ on:
         description: 'Release version'     
         required: true
         default: '3.14.0'
-env:
-  PACKER_REPO: r0zbot/packer-action
 jobs:
   release_cloud:
     runs-on: ubuntu-latest
@@ -26,7 +24,7 @@ jobs:
             export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
           fi
       - name: Run the packer install and test
-        uses: ${{ env.PACKER_REPO }}
+        uses: r0zbot/packer-action
         with:
           rocketchat_version: '${{ env.ROCKETCHAT_VERSION }}'
           do_token: ${{ secrets.do_token }}
