@@ -26,9 +26,9 @@ jobs:
             export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
           fi
       - name: Run the packer install and test
-        uses: ${{ PACKER_REPO }}
+        uses: ${{ env.PACKER_REPO }}
         with:
-          rocketchat_version: '${{ ROCKETCHAT_VERSION }}'
+          rocketchat_version: '${{ env.ROCKETCHAT_VERSION }}'
           do_token: ${{ secrets.do_token }}
           aws_key_id: ${{ secrets.aws_key_id }}
           aws_secret_key: ${{ secrets.aws_secret_key }}
