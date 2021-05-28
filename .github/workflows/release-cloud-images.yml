@@ -12,8 +12,23 @@ on:
         required: true
         default: '3.14.0'
 jobs:
+  verify_release:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Parse environment variables
+        run: |
+          if [[ -n "${{ github.event.release.tag_name }}" ]]; then
+            export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          else
+            export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          fi
+
+      - name: "Check if release candidate"
+        run: |
+          [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]]
   release_cloud:
     runs-on: ubuntu-latest
+    needs: verify_release
     steps:
       - uses: actions/checkout@v2
       - name: Parse environment variables

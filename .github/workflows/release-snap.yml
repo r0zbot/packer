@@ -15,6 +15,21 @@ env:
   SNAPCRAFT_REPO: RocketChat/rocketchat-server-snap
   TESTS_REPO: RocketChat/rocketchat-release-tests
 jobs:
+  verify_release:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Parse environment variables
+        run: |
+          if [[ -n "${{ github.event.release.tag_name }}" ]]; then
+            export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          else
+            export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          fi
+
+      - name: "Check if release candidate"
+        run: |
+          [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]]
+
   release_snap_amd64:
     runs-on: ubuntu-18.04
     needs: verify_release
