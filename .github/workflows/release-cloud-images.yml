@@ -24,7 +24,7 @@ jobs:
             export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
           fi
       - name: Run the packer install and test
-        uses: r0zbot/packer-action
+        uses: r0zbot/packer-action@master
         with:
           rocketchat_version: '${{ env.ROCKETCHAT_VERSION }}'
           do_token: ${{ secrets.do_token }}
