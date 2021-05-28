@@ -25,12 +25,13 @@ jobs:
           do_token: ${{ secrets.do_token }}
           aws_key_id: ${{ secrets.aws_key_id }}
           aws_secret_key: ${{ secrets.aws_secret_key }}
-      # - name: Rocket.Chat Notification
-      #   uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-      #   if: env.CANDIDATE == 'false'
-      #   with:
-      #     type: ${{ job.status }}
-      #     job_name: '*Packer image build* - [DO Marketplace](https://marketplace.digitalocean.com/vendorportal/5cbf905da6e1a17be804b006/32/edit)'
-      #     mention: 'here'
-      #     mention_if: 'failure'
-      #     url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: env.CANDIDATE == 'false'
+        with:
+          type: ${{ job.status }}
+          job_name: '*Packer image build* - [DO Marketplace](https://marketplace.digitalocean.com/vendorportal/5cbf905da6e1a17be804b006/32/edit)'
+          mention: 'here'
+          mention_if: 'failure'
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
