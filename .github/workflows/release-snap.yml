@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Parse environment variables
         run: |
-          export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
           echo "CHANNEL=${ROCKETCHAT_VERSION:0:1}.x" >> $GITHUB_ENV
           echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
           [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]] && echo "CANDIDATE=false" >> $GITHUB_ENV

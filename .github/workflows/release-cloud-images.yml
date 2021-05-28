@@ -13,12 +13,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Parse environment variables
         run: |
-          export ROCKETCHAT_VERSION=${{ github.event.inputs.release }}
+          export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
           echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
           [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]] && echo "CANDIDATE=false" >> $GITHUB_ENV
 
       - name: Run the packer install and test
-        uses: r0zbot/packer-action@master
+        uses: RocketChat/rocketchat-packer@mainZZ
         if: env.CANDIDATE == 'false'
         with:
           rocketchat_version: '${{ env.ROCKETCHAT_VERSION }}'
