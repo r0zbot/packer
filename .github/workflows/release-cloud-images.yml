@@ -18,7 +18,7 @@ jobs:
           [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]] && echo "CANDIDATE=false" >> $GITHUB_ENV
 
       - name: Run the packer install and test
-        uses: RocketChat/rocketchat-packer@mainZZ
+        uses: RocketChat/rocketchat-packer@main
         if: env.CANDIDATE == 'false'
         with:
           rocketchat_version: '${{ env.ROCKETCHAT_VERSION }}'
