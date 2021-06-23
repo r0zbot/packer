@@ -68,7 +68,7 @@ jobs:
           . ./test_scripts/basic_test.sh http://127.0.0.1:8888
           helm upgrade test-upgrade-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
           helm test test-install-rocketchat
-          
+
           echo "Seeing if information persisted across updates"
           test_endpoint "$base_url/api/v1/channels.messages?roomId=GENERAL" -H "$userId" -H "$authToken"
           if [[ "$response" != *"This is a test message from $TEST_USER"* ]]; then
@@ -92,21 +92,15 @@ jobs:
           message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
           push: true
       
-      - name: Publish snap to edge channel
-        uses: snapcore/action-publish@v1
+      - name: Push to gh-pages
+        uses: EndBug/add-and-commit@v7
         with:
-          store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
-          snap: ${{ steps.build.outputs.snap }}
-          release: ${{ env.CHANNEL }}/edge
-      
-      - name: Test snap updating
-        run: ./test_scripts/snap_update_test.sh
-      
-      - name: Promote edge to candidate
-        run: |
-          echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
-          REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
-          snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
+          add: 'rocketchat/Chart.yaml'
+          cwd: gh-pages
+          branch: gh-pages
+          repository: "${{ env.HELM_REPO }}"
+          message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
+          push: true
       
       # - name: Rocket.Chat Notification
       #   uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
