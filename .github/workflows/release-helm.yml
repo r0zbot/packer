@@ -24,7 +24,7 @@ jobs:
         with:
           repository: "${{ env.HELM_REPO }}"
           path: helm-charts
-          token: 'bla'
+          # token: 'bla'
 
       - name: Clone helm repo (gh-pages)
         if: env.CANDIDATE == 'false'
@@ -33,7 +33,7 @@ jobs:
           repository: "${{ env.HELM_REPO }}"
           ref: gh-pages
           path: gh-pages
-          token: 'bla'
+          # token: 'bla'
       
       - name: Clone tests repo
         uses: actions/checkout@v2
