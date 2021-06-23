@@ -7,7 +7,7 @@ on:
 jobs:
   update_helm_chart:
     env:
-      HELM_REPO: RocketChat/helm-charts
+      HELM_REPO: r0zbot/helm-charts #TODO: mudar!
       TESTS_REPO: RocketChat/rocketchat-release-tests
     runs-on: ubuntu-18.04
     if: github.event_name == 'release'
@@ -24,6 +24,7 @@ jobs:
         with:
           repository: "${{ env.HELM_REPO }}"
           path: helm-charts
+          ref: improve/update-mongo-chart #TODO: TIRAR!
           # token: 'bla'
 
       - name: Clone helm repo (gh-pages)
@@ -57,7 +58,7 @@ jobs:
         run: helm package ./helm-charts/rocketchat && cp rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz gh-pages/charts/
 
       - name: Install helm package
-        run: helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=pass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-pass test-install-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
+        run: helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=testpass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-testpass test-install-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
 
       - name: Test helm installation
         run: helm test test-install-rocketchat
@@ -65,7 +66,7 @@ jobs:
       - name: Test helm upgrade
         run: |
           helm repo add rocketchat https://rocketchat.github.io/helm-charts
-          helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=pass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-pass test-upgrade-rocketchat rocketchat/rocketchat
+          helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=testpass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-testpass test-upgrade-rocketchat rocketchat/rocketchat
           kubectl port-forward --namespace default $(kubectl get pods --namespace default -l "app.kubernetes.io/name=rocketchat,app.kubernetes.io/instance=test-upgrade-rocketchat" -o jsonpath='{ .items[0].metadata.name }') 8888:3000 &
           ./test_scripts/wait_http.sh http://127.0.0.1:8888
           . ./test_scripts/basic_test.sh http://127.0.0.1:8888
