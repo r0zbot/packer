@@ -44,8 +44,8 @@ jobs:
       - name: Update chart and rocketchat versions 
         id: version
         run: |
-          sed -i -r '/appVersion:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
-          sed -i -r '/version:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
+          sed -i -r '/^appVersion:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
+          sed -i -r '/^version:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
       
       - name: Pull dependencies
         run: helm dependency update ./helm-charts/rocketchat
