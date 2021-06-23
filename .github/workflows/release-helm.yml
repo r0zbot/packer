@@ -1,11 +1,11 @@
-name: Create snap packages
+name: Update helm chart
 
 on:
   release:
     types: [published]
 
 jobs:
-  release_snap_amd64:
+  update_helm_chart:
     env:
       HELM_REPO: RocketChat/helm-charts
       TESTS_REPO: RocketChat/rocketchat-release-tests
@@ -44,8 +44,8 @@ jobs:
       - name: Update chart and rocketchat versions 
         id: version
         run: |
-          sed -i 'sed -r '/appVersion:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
-          sed -i 'sed -r '/version:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
+          sed -i -r '/appVersion:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
+          sed -i -r '/version:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
       
       - name: Pull dependencies
         run: helm dependency update ./helm-charts/rocketchat
