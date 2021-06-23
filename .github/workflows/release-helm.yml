@@ -1,0 +1,119 @@
+name: Create snap packages
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release_snap_amd64:
+    env:
+      HELM_REPO: RocketChat/helm-charts
+      TESTS_REPO: RocketChat/rocketchat-release-tests
+    runs-on: ubuntu-18.04
+    if: github.event_name == 'release'
+    steps:
+      - name: Parse environment variables
+        run: |
+          export ROCKETCHAT_VERSION=${{ github.event.release.tag_name }}
+          echo "ROCKETCHAT_VERSION=$ROCKETCHAT_VERSION" >> $GITHUB_ENV
+          [[ -z "$(echo ${{ env.ROCKETCHAT_VERSION }} | grep rc)" ]] && echo "CANDIDATE=false" >> $GITHUB_ENV
+
+      - name: Clone helm repo (master)
+        if: env.CANDIDATE == 'false'
+        uses: actions/checkout@v2
+        with:
+          repository: "${{ env.HELM_REPO }}"
+          path: helm-charts
+          token: 'bla'
+
+      - name: Clone helm repo (gh-pages)
+        if: env.CANDIDATE == 'false'
+        uses: actions/checkout@v2
+        with:
+          repository: "${{ env.HELM_REPO }}"
+          ref: gh-pages
+          path: gh-pages
+          token: 'bla'
+      
+      - name: Clone tests repo
+        uses: actions/checkout@v2
+        with:
+          repository: "${{ env.TESTS_REPO }}"
+          path: './test_scripts'
+          
+      - name: Update chart and rocketchat versions 
+        id: version
+        run: |
+          sed -i 'sed -r '/appVersion:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
+          sed -i 'sed -r '/version:/ s/ .+/ ${{ env.ROCKETCHAT_VERSION }}/' ./helm-charts/rocketchat/Chart.yaml
+      
+      - name: Pull dependencies
+        run: helm dependency update ./helm-charts/rocketchat
+      
+      - name: Generate helm package
+        run: helm package ./helm-charts/rocketchat && cp rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz gh-pages/charts/
+
+      - name: Install helm package
+        run: helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=pass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-pass test-install-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
+
+      - name: Test helm installation
+        run: helm test test-install-rocketchat
+
+      - name: Test helm upgrade
+        run: |
+          helm repo add rocketchat https://rocketchat.github.io/helm-charts
+          helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=pass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-pass test-upgrade-rocketchat rocketchat/rocketchat
+          kubectl port-forward --namespace default $(kubectl get pods --namespace default -l "app.kubernetes.io/name=rocketchat,app.kubernetes.io/instance=test-upgrade-rocketchat" -o jsonpath='{ .items[0].metadata.name }') 8888:3000 &
+          ./test_scripts/wait_http.sh http://127.0.0.1:8888
+          . ./test_scripts/basic_test.sh http://127.0.0.1:8888
+          helm upgrade test-upgrade-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
+          helm test test-install-rocketchat
+          
+          echo "Seeing if information persisted across updates"
+          test_endpoint "$base_url/api/v1/channels.messages?roomId=GENERAL" -H "$userId" -H "$authToken"
+          if [[ "$response" != *"This is a test message from $TEST_USER"* ]]; then
+            echo "Couldn't find sent message. Somethings wrong!"
+            exit 2
+          fi
+
+          echo "Tests passed!"
+          
+
+      - name: Re-generate helm index
+        run: helm index ./gh-pages/
+      
+      - name: Push to master
+        uses: EndBug/add-and-commit@v7
+        with:
+          add: 'rocketchat/Chart.yaml'
+          cwd: helm-charts
+          branch: master
+          repository: "${{ env.HELM_REPO }}"
+          message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
+          push: true
+      
+      - name: Publish snap to edge channel
+        uses: snapcore/action-publish@v1
+        with:
+          store_login: ${{ secrets.SNAPCRAFT_LOGIN }}
+          snap: ${{ steps.build.outputs.snap }}
+          release: ${{ env.CHANNEL }}/edge
+      
+      - name: Test snap updating
+        run: ./test_scripts/snap_update_test.sh
+      
+      - name: Promote edge to candidate
+        run: |
+          echo "${{ secrets.SNAPCRAFT_LOGIN }}" | snapcraft login --with -
+          REVISION=$(snapcraft list-revisions rocketchat-server --arch amd64 | grep $CHANNEL/edge | cut -d' ' -f 1 | head -n 1)
+          snapcraft release rocketchat-server $REVISION $CHANNEL/candidate
+      
+      # - name: Rocket.Chat Notification
+      #   uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      #   if: env.CANDIDATE == 'false'
+      #   with:
+      #     type: ${{ job.status }}
+      #     job_name: '*Snapcraft build*'
+      #     mention: 'here'
+      #     mention_if: 'failure'
+      #     url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
