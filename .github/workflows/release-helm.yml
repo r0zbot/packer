@@ -40,7 +40,10 @@ jobs:
         with:
           repository: "${{ env.TESTS_REPO }}"
           path: './test_scripts'
-          
+      
+      - name: Setup k3d
+        uses: nolar/setup-k3d-k3s@v1
+
       - name: Update chart and rocketchat versions 
         id: version
         run: |
