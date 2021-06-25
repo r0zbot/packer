@@ -95,7 +95,7 @@ jobs:
           add: 'rocketchat/Chart.yaml'
           cwd: helm-charts
           branch: master
-          repository: "${{ env.HELM_REPO }}"
+          pull_strategy: NO-PULL
           message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
           push: true
       
