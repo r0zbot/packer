@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=3.14.1
+VERSION=3.14.2
 # VERSION=2.4.14
 
 yes | gh release delete $VERSION
