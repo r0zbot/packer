@@ -89,6 +89,7 @@ jobs:
           branch: master
           message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
           push: true
+          default_author: github_actions
       
       - name: Push to gh-pages
         uses: EndBug/add-and-commit@v7
@@ -98,6 +99,8 @@ jobs:
           branch: gh-pages
           message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
           push: true
+          default_author: github_actions
+      
       
       # - name: Rocket.Chat Notification
       #   uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
