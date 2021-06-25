@@ -87,7 +87,7 @@ jobs:
           
 
       - name: Re-generate helm index
-        run: helm index ./gh-pages/
+        run: helm repo index ./gh-pages/
       
       - name: Push to master
         uses: EndBug/add-and-commit@v7
