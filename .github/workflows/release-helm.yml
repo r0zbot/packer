@@ -94,7 +94,7 @@ jobs:
       - name: Push to gh-pages
         uses: EndBug/add-and-commit@v7
         with:
-          add: 'rocketchat/Chart.yaml'
+          add: '.'
           cwd: gh-pages
           branch: gh-pages
           message: "Chore: bump Rocket.Chat and chart version to ${{ env.ROCKETCHAT_VERSION }}"
