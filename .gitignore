@@ -3,3 +3,6 @@ manifest.json
 manifest.*.json
 rocketchatctl
 *.snap
+helm-repo-key
+helm-repo-key.pub
+
