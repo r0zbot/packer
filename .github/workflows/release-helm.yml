@@ -58,24 +58,24 @@ jobs:
       - name: Test helm installation
         run: helm test test-install-rocketchat
 
-      # - name: Test helm upgrade
-      #   run: |
-      #     helm repo add rocketchat https://rocketchat.github.io/helm-charts
-      #     helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=testpass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-testpass test-upgrade-rocketchat rocketchat/rocketchat
-      #     kubectl port-forward --namespace default $(kubectl get pods --namespace default -l "app.kubernetes.io/name=rocketchat,app.kubernetes.io/instance=test-upgrade-rocketchat" -o jsonpath='{ .items[0].metadata.name }') 8888:3000 &
-      #     ./test_scripts/wait_http.sh http://127.0.0.1:8888
-      #     . ./test_scripts/basic_test.sh http://127.0.0.1:8888
-      #     helm upgrade test-upgrade-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
-      #     helm test test-install-rocketchat
+      - name: Test helm upgrade
+        run: |
+          helm repo add r0zbot https://r0zbot.github.io/helm-charts #TODO CHANGE THIS
+          helm install --set mongodb.auth.username=rocketchat,mongodb.auth.password=testpass,mongodb.auth.database=rocketchat,mongodb.auth.rootPassword=root-testpass test-upgrade-rocketchat r0zbot/rocketchat
+          kubectl port-forward --namespace default $(kubectl get pods --namespace default -l "app.kubernetes.io/name=rocketchat,app.kubernetes.io/instance=test-upgrade-rocketchat" -o jsonpath='{ .items[0].metadata.name }') 8888:3000 &
+          ./test_scripts/wait_http.sh http://127.0.0.1:8888
+          . ./test_scripts/basic_test.sh http://127.0.0.1:8888
+          helm upgrade test-upgrade-rocketchat rocketchat-${{ env.ROCKETCHAT_VERSION }}.tgz
+          helm test test-install-rocketchat
 
-      #     echo "Seeing if information persisted across updates"
-      #     test_endpoint "$base_url/api/v1/channels.messages?roomId=GENERAL" -H "$userId" -H "$authToken"
-      #     if [[ "$response" != *"This is a test message from $TEST_USER"* ]]; then
-      #       echo "Couldn't find sent message. Somethings wrong!"
-      #       exit 2
-      #     fi
+          echo "Seeing if information persisted across updates"
+          test_endpoint "$base_url/api/v1/channels.messages?roomId=GENERAL" -H "$userId" -H "$authToken"
+          if [[ "$response" != *"This is a test message from $TEST_USER"* ]]; then
+            echo "Couldn't find sent message. Somethings wrong!"
+            exit 2
+          fi
 
-      #     echo "Tests passed!"
+          echo "Tests passed!"
           
 
       - name: Re-generate helm index
